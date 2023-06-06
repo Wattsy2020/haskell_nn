@@ -114,16 +114,14 @@ instance (Eq a, Num a) => Num (Node a) where
 
   (*) :: Node a -> Node a -> Node a
   (*) (Constant 0) _ = Constant 0
-  (*) _ (Constant 0) = Constant 0
   (*) (Constant 1) var = var
-  (*) var (Constant 1) = var
-  -- always keep the constant as the first term, so simplifications can be done easily
+  (*) (Constant (-1)) var = negate var
   (*) (Constant x1) (Constant x2) = Constant $ x1 * x2
+  -- always keep the constant as the first term, so simplifications can be done easily
   (*) n1 n2@(Constant _) = n2 * n1
   -- check if both terms have constants in them
-  (*) n1 n2 = case (n1, n2) of
-    (Constant c1, Node [Constant c2, node2] Multiply) -> Node [Constant (c1 * c2), node2] Multiply
-    (node1, node2) -> Node [node1, node2] Multiply
+  (*) (Constant c1) (Node [Constant c2, n2] Multiply) = Node [Constant (c1 * c2), n2] Multiply
+  (*) n1 n2 = Node [n1, n2] Multiply
 
   negate :: Node a -> Node a
   negate (Constant x1) = Constant $ negate x1
@@ -232,7 +230,7 @@ derivative (Node inputNodes operator) =
     ([x1, x2], Add) -> derivative x1 + derivative x2
     ([x1, x2], Subtract) -> derivative x1 - derivative x2
     ([x1, x2], Multiply) -> (x1 * derivative x2) + (derivative x1 * x2)
-    ([x1, x2], Divide) -> ((x2 * derivative x1) - (x1 * derivative x2)) / (x2 * x2)
+    ([x1, x2], Divide) -> ((x2 * derivative x1) - (x1 * derivative x2)) / (x2 ** 2)
     ([x], Negate) -> negate $ derivative x
     ([x], Exp) -> derivative x * exp x
     ([x], Log) -> derivative x / x

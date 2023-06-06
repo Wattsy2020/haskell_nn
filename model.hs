@@ -48,4 +48,7 @@ main = do
   print (evalNode expr4 (Map.singleton "x" $ sqrt pi), exp (-1))
 
   -- test out neural network functions
-  print (evalNode (sigmoid var) (Map.singleton "x" 5))
+  let sigmoidExpr = sigmoid var
+  print sigmoidExpr
+  print $ evalNode sigmoidExpr (Map.singleton "x" 5)
+  putStrLn $ showDerivative sigmoidExpr
