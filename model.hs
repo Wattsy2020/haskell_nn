@@ -7,6 +7,7 @@ import Autograd
     showDerivative,
   )
 import Data.Map qualified as Map
+import NN (sigmoid)
 
 main = do
   let var = Variable "x"
@@ -45,3 +46,6 @@ main = do
   print expr4
   putStrLn $ showDerivative expr4
   print (evalNode expr4 (Map.singleton "x" $ sqrt pi), exp (-1))
+
+  -- test out neural network functions
+  print (evalNode (sigmoid var) (Map.singleton "x" 5))
