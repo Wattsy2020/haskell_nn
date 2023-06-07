@@ -11,6 +11,12 @@ solveIterate node = iterate (newtonSolve node)
 newtonOptimiser :: (Eq a, Floating a) => Node a -> a -> [a]
 newtonOptimiser node = solveIterate (derivative node)
 
+sgdOptimizeStep :: (Eq a, Floating a) => a -> Node a -> a -> a
+sgdOptimizeStep lr node initGuess = initGuess - lr * evalNode (derivative node) (Map.singleton "x" initGuess)
+
+sgdOptimizer :: (Eq a, Floating a) => a -> Node a -> a -> [a]
+sgdOptimizer lr node = iterate (sgdOptimizeStep lr node)
+
 main = do
   let var = Variable "x"
   let eq1 = (var - 2) ** 2
@@ -33,3 +39,4 @@ main = do
   let eq5 = (var - 2) ** 4 + 1
   putStrLn $ "Minimize " ++ show eq5
   print $ take 20 $ newtonOptimiser eq5 0
+  print $ take 20 $ sgdOptimizer 0.1 eq5 0 -- sgd requires more steps to converge
