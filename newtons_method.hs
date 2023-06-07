@@ -2,11 +2,14 @@
 import Autograd (Node (..), derivative, evalNode)
 import Data.Map qualified as Map
 
-solve :: (Eq a, Floating a) => Node a -> a -> a
-solve node initGuess = initGuess - evalNode (node / derivative node) (Map.singleton "x" initGuess)
+newtonSolve :: (Eq a, Floating a) => Node a -> a -> a
+newtonSolve node initGuess = initGuess - evalNode (node / derivative node) (Map.singleton "x" initGuess)
 
 solveIterate :: (Eq a, Floating a) => Node a -> a -> [a]
-solveIterate node = iterate (solve node)
+solveIterate node = iterate (newtonSolve node)
+
+newtonOptimiser :: (Eq a, Floating a) => Node a -> a -> [a]
+newtonOptimiser node = solveIterate (derivative node)
 
 main = do
   let var = Variable "x"
@@ -26,3 +29,7 @@ main = do
   let eq4 = (exp (tan var) - 1) ** 3
   print eq4
   print $ take 10 $ solveIterate eq4 (-4)
+
+  let eq5 = (var - 2) ** 4 + 1
+  putStrLn $ "Minimize " ++ show eq5
+  print $ take 20 $ newtonOptimiser eq5 0
